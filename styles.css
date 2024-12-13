@@ -1,0 +1,485 @@
+:root {
+    --primary-color: #4a9eff;
+    --bg-color: #1a1a1a;
+    --chat-bg: #2d2d2d;
+    --text-color: #ffffff;
+    --border-color: #404040;
+    --tool-bg: #363636;
+    --shadow: 0 2px 6px rgba(0,0,0,0.3);
+    --message-bot-bg: #363636;
+    --message-user-bg: #1a73e8;
+    --input-bg: #363636;
+    --button-hover: #4d4d4d;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.app {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+header {
+    background: var(--chat-bg);
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border-color);
+}
+
+h1 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+nav {
+    display: flex;
+    gap: 1rem;
+}
+
+nav a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+nav a:hover {
+    text-decoration: none;
+    opacity: 1;
+}
+
+.chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--chat-bg);
+    overflow: hidden;
+    padding-bottom: 80px; /* Высота input-area */
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    margin-bottom: 6px; /* Добавляем отступ снизу для контента */
+}
+
+.messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages::-webkit-scrollbar-track {
+    background: var(--chat-bg);
+}
+
+.messages::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.message {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    max-width: 80%;
+}
+
+.message.bot {
+    margin-right: auto;
+}
+
+.message.user {
+    margin-left: auto;
+    flex-direction: row-reverse;
+}
+
+.message .content {
+    max-width: 100%;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: hidden; /* Убираем вертикальную прокрутку */
+    scrollbar-width: none; /* Скрываем scrollbar (для Firefox) */
+}
+
+.content {
+    background: var(--message-bot-bg);
+    padding: 0.8rem;
+    border-radius: 1rem;
+    border-bottom-left-radius: 0.3rem;
+    border: 1px solid var(--border-color);
+    overflow: hidden; /* Убедитесь, что всё содержимое остается внутри */
+}
+
+.content mjx-container {
+    display: inline-block;
+    width: auto !important;
+    min-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin: 0.5rem 0;
+    padding: 0.5rem 0;
+    text-align: center;
+}
+
+.content mjx-container > svg {
+    display: inline-block;
+    max-width: none;
+    margin: 0 auto;
+}
+
+.content mjx-container::-webkit-scrollbar {
+    width: 3px;
+}
+
+.content mjx-container::-webkit-scrollbar-track {
+    background: var(--message-bot-bg);
+}
+
+.content mjx-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.message.user .content {
+    background: var(--message-user-bg);
+    color: white;
+    border-radius: 1rem;
+    border-bottom-right-radius: 0.3rem;
+    border: none;
+}
+
+.avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--tool-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    border: 1px solid var(--border-color);
+}
+
+.input-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--chat-bg);
+    border-top: 1px solid var(--border-color);
+    padding: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+    z-index: 1000;
+}
+
+.tools {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    display: none;
+    margin-bottom: 0;
+    background: var(--tool-bg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.quick-expressions {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.quick-expressions::-webkit-scrollbar {
+    height: 4px;
+}
+
+.quick-expressions::-webkit-scrollbar-track {
+    background: var(--tool-bg);
+}
+
+.quick-expressions::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+button {
+    background: var(--tool-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+    color: var(--text-color);
+}
+
+button:hover {
+    background: var(--button-hover);
+}
+
+.input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+input {
+    flex: 1;
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 1.5rem;
+    font-size: 1rem;
+    outline: none;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+input:focus {
+    border-color: var(--primary-color);
+}
+
+input::placeholder {
+    color: #888;
+}
+
+.send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.send-btn:hover {
+    background: #1557b0;
+    transform: scale(1.05);
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.explain-btn {
+    align-self: flex-start;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.explain-btn:hover {
+    background: #1557b0;
+    transform: scale(1.05);
+}
+
+/* Стили для объяснения решения */
+.explanation {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.explanation h4 {
+    color: #2c3e50;
+    margin: 0 0 15px 0;
+}
+
+.explanation .steps {
+    margin: 15px 0;
+    padding-left: 15px;
+    border-left: 3px solid #3498db;
+}
+
+.explanation p {
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+.explanation strong {
+    color: #2c3e50;
+}
+
+.explanation .math {
+    background: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    margin: 8px 0;
+    text-align: center;
+}
+
+.explain-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.explain-btn:hover {
+    background: #2980b9;
+}
+
+/* MathJax стили */
+mjx-container {
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    color: var(--text-color) !important;
+}
+
+mjx-math {
+    color: var(--text-color) !important;
+}
+
+/* Стили для контейнера формул */
+.math-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1rem 0;
+    text-align: center;
+    background: #131313;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+}
+
+/* Стили для текстового ответа */
+.text-answer {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    font-family: monospace;
+    color: #333;
+    background: #fff;
+    border-left: 4px solid #007bff;
+}
+
+/* Стили для объяснения решения */
+.solution-explanation {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.solution-explanation h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.initial-expression, .solution-steps, .final-result, .explanation-notes {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.step {
+    margin: 15px 0;
+    padding: 10px;
+    border-left: 3px solid #3498db;
+    background: rgba(52, 152, 219, 0.05);
+}
+
+.step strong {
+    color: #2980b9;
+}
+
+.math {
+    margin: 10px 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.explanation-notes ul {
+    padding-left: 20px;
+}
+
+.explanation-notes li {
+    margin: 5px 0;
+    color: #34495e;
+}
+
+@media (max-width: 600px) {
+    .message {
+        max-width: 90%;
+    }
+
+    .tools-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .quick-expressions button {
+        min-width: 60px;
+    }
+
+    header {
+        padding: 0.8rem;
+    }
+
+    h1 {
+        font-size: 1.2rem;
+    }
+
+    nav a {
+        font-size: 0.8rem;
+    }
+
+    .input-area {
+        padding: 0.8rem;
+    }
+}

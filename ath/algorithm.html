@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Алгоритм Работы Калькулятора Интегралов</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bs-body-bg: #1a1d20;
+            --bs-body-color: #e9ecef;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            padding: 20px;
+        }
+        pre {
+            background-color: #2b3035 !important;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            color: #e9ecef;
+            border: 1px solid #495057;
+            margin: 15px 0;
+        }
+        code {
+            color: #0dcaf0 !important;
+            background-color: #2b3035;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .method-description {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #495057;
+            border-radius: 5px;
+            background-color: #212529;
+        }
+        h1 {
+            color: #0dcaf0;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #495057;
+        }
+        h2 {
+            color: #0dcaf0;
+            margin-top: 40px;
+            padding-top: 20px;
+        }
+        h3 {
+            color: #20c997;
+            margin-top: 30px;
+        }
+        .step {
+            background-color: #2b3035;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #0dcaf0;
+        }
+        .example-code {
+            background-color: #2b3035;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .note {
+            background-color: #2b3035;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #20c997;
+        }
+        .warning {
+            background-color: #2b3035;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+        }
+        .tree-view {
+            font-family: monospace;
+            white-space: pre;
+            color: #e9ecef;
+            margin: 15px 0;
+        }
+        .formula {
+            background-color: #2b3035;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0dcaf0;
+        }
+        .nav-pills .nav-link {
+            color: #e9ecef;
+        }
+        .table {
+            --bs-table-bg: #212529;
+            --bs-table-color: #e9ecef;
+            border-color: #495057;
+        }
+        .comment {
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-xl-2 px-0 position-fixed">
+                <nav class="nav flex-column nav-pills p-3" id="navbar-example3">
+                    <a class="nav-link" href="#intro">Введение</a>
+                    <a class="nav-link" href="#basics">Основы работы</a>
+                    <a class="nav-link" href="#classes">Структура классов</a>
+                    <a class="nav-link" href="#parsing">Разбор выражения</a>
+                    <a class="nav-link" href="#integration">Интегрирование</a>
+                    <a class="nav-link" href="#special">Особые случаи</a>
+                    <a class="nav-link" href="#examples">Примеры</a>
+                    <a class="nav-link" href="#error-handling">Обработка ошибок</a>
+                    <a class="nav-link" href="#ui">Интерфейс</a>
+                </nav>
+            </div>
+            <div class="col-md-9 col-xl-10 offset-md-3 offset-xl-2">
+                <h1 id="intro">Как работает калькулятор интегралов?</h1>
+
+                <div class="note">
+                    <h4> Цель этой документации</h4>
+                    <p>
+                        Мы разберем работу калькулятора интегралов шаг за шагом, используя простые примеры 
+                        и понятные объяснения. Вы узнаете, как программа превращает математическое выражение 
+                        в решение.
+                    </p>
+                </div>
+
+                <h2 id="basics">1. Как калькулятор понимает математику?</h2>
+                <div class="method-description">
+                    <h3>1.1 Представление выражений</h3>
+                    <p>
+                        Когда вы вводите выражение, например "2*x + 1", калькулятор видит его как дерево:
+                    </p>
+                    <div class="tree-view">
+           +
+          / \
+         *   1
+        / \
+       2   x
+                    </div>
+                    <p>Это помогает разбить сложное выражение на простые части:</p>
+                    <ul>
+                        <li>Вершина "+" говорит о сложении</li>
+                        <li>Левая ветвь "*" - это умножение</li>
+                        <li>Листья дерева - это числа и переменные</li>
+                    </ul>
+                </div>
+
+                <h2 id="classes">2. Структура классов</h2>
+                <div class="method-description">
+                    <h3>2.1 Основные классы</h3>
+                    <div class="example-code">
+                        <p>Калькулятор разделен на два основных класса:</p>
+                        <pre><code class="language-javascript">// Класс для обработки интегрирования
+class IntegrationService {
+    constructor() {
+        this.#initializeRules();
+    }
+
+    // Приватные поля
+    #rules = new Map();
+    #config = {
+        DECIMAL_PLACES: 4,
+        MAX_STEPS: 100
+    };
+
+    // Инициализация правил интегрирования
+    #initializeRules() {
+        this.#rules.set('power', this.#integratePower.bind(this));
+        this.#rules.set('sum', this.#integrateSum.bind(this));
+        this.#rules.set('product', this.#integrateProduct.bind(this));
+        this.#rules.set('trigonometric', this.#integrateTrigonometric.bind(this));
+    }
+}
+
+// Класс для управления интерфейсом
+class UIController {
+    constructor() {
+        this.#initializeElements();
+        this.#bindEvents();
+    }
+
+    // Приватные поля
+    #elements = {
+        input: null,
+        result: null,
+        steps: null,
+        examples: null
+    };
+
+    // Инициализация элементов UI
+    #initializeElements() {
+        this.#elements.input = document.getElementById('expression');
+        this.#elements.result = document.getElementById('result');
+        this.#elements.steps = document.getElementById('steps');
+        this.#elements.examples = document.getElementById('examples');
+    }
+}</code></pre>
+                    </div>
+
+                    <h3>2.2 Вспомогательные классы</h3>
+                    <div class="example-code">
+                        <pre><code class="language-javascript">// Класс для обработки ошибок
+class IntegrationError extends Error {
+    constructor(message, type = 'general') {
+        super(message);
+        this.name = 'IntegrationError';
+        this.type = type;
+    }
+}
+
+// Класс для хранения результата интегрирования
+class IntegrationResult {
+    constructor(result, steps = []) {
+        this.result = result;
+        this.steps = steps;
+    }
+
+    addStep(step) {
+        this.steps.push(step);
+    }
+
+    toString() {
+        return this.result;
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h2 id="parsing">3. Разбор математического выражения</h2>
+                <div class="method-description">
+                    <h3>3.1 Парсинг выражения</h3>
+                    <div class="example-code">
+                        <pre><code class="language-javascript">class IntegrationService {
+    // Метод для парсинга выражения
+    #parseExpression(expression) {
+        try {
+            // Очистка выражения
+            expression = expression.replace(/\s+/g, '');
+            
+            // Проверка на пустое выражение
+            if (!expression) {
+                throw new IntegrationError('Выражение не может быть пустым', 'empty');
+            }
+
+            // Парсинг с помощью math.js
+            const node = math.parse(expression);
+            
+            // Проверка на наличие переменной x
+            if (!this.#containsVariable(node, 'x')) {
+                throw new IntegrationError('Выражение должно содержать переменную x', 'no_variable');
+            }
+
+            return node;
+        } catch (error) {
+            if (error instanceof IntegrationError) throw error;
+            throw new IntegrationError('Ошибка при разборе выражения: ' + error.message, 'parse');
+        }
+    }
+
+    // Проверка наличия переменной в выражении
+    #containsVariable(node, varName) {
+        if (node.type === 'SymbolNode') {
+            return node.name === varName;
+        }
+        if (node.type === 'OperatorNode') {
+            return node.args.some(arg => this.#containsVariable(arg, varName));
+        }
+        if (node.type === 'FunctionNode') {
+            return this.#containsVariable(node.args[0], varName);
+        }
+        return false;
+    }</code></pre>
+                    </div>
+
+                    <h3>3.2 Анализ узлов дерева</h3>
+                    <div class="example-code">
+                        <pre><code class="language-javascript">// Определение типа узла и выбор правила интегрирования
+#processNode(node) {
+    switch (node.type) {
+        case 'OperatorNode':
+            return this.#processOperatorNode(node);
+        case 'ConstantNode':
+            return this.#processConstantNode(node);
+        case 'SymbolNode':
+            return this.#processSymbolNode(node);
+        case 'FunctionNode':
+            return this.#processFunctionNode(node);
+        default:
+            throw new IntegrationError(`Неподдерживаемый тип узла: ${node.type}`);
+    }
+}
+
+// Обработка операторов
+#processOperatorNode(node) {
+    switch (node.op) {
+        case '+':
+        case '-':
+            return this.#rules.get('sum')(node);
+        case '*':
+            return this.#rules.get('product')(node);
+        case '^':
+            return this.#rules.get('power')(node);
+        default:
+            throw new IntegrationError(`Неподдерживаемый оператор: ${node.op}`);
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h2 id="integration">4. Правила интегрирования</h2>
+                <div class="method-description">
+                    <h3>4.1 Интегрирование степенной функции</h3>
+                    <div class="example-code">
+                        <pre><code class="language-javascript">#integratePower(node) {
+    // Проверяем, что основание - это x
+    if (node.args[0].type === 'SymbolNode' && node.args[0].name === 'x') {
+        // Получаем показатель степени
+        const power = this.#evaluateNode(node.args[1]);
+        
+        // Проверяем особый случай: x^(-1)
+        if (power === -1) {
+            return new IntegrationResult(
+                '\\ln|x|',
+                ['Применяем формулу: ∫(1/x)dx = ln|x|']
+            );
+        }
+
+        // Общий случай: x^n
+        const newPower = power + 1;
+        return new IntegrationResult(
+            `\\frac{x^{${newPower}}}{${newPower}}`,
+            [`Применяем формулу: ∫x^${power}dx = x^${newPower}/${newPower}`]
+        );
+    }
+
+    throw new IntegrationError('Неподдерживаемая степенная функция');
+}</code></pre>
+                    </div>
+
+                    <h3>4.2 Интегрирование суммы</h3>
+                    <div class="example-code">
+                        <pre><code class="language-javascript">#integrateSum(node) {
+    // Получаем результаты интегрирования каждого слагаемого
+    const leftResult = this.#processNode(node.args[0]);
+    const rightResult = this.#processNode(node.args[1]);
+
+    // Формируем шаги решения
+    const steps = [
+        'Применяем правило: интеграл суммы равен сумме интегралов',
+        ...leftResult.steps,
+        ...rightResult.steps
+    ];
+
+    // Формируем результат
+    const result = `${leftResult.result} ${node.op} ${rightResult.result}`;
+
+    return new IntegrationResult(result, steps);
+}</code></pre>
+                    </div>
+
+                    <h3>4.3 Интегрирование произведения</h3>
+                    <div class="example-code">
+                        <pre><code class="language-javascript">#integrateProduct(node) {
+    // Проверяем, является ли один из множителей константой
+    const [constNode, varNode] = this.#separateConstAndVar(node.args);
+    
+    if (constNode) {
+        const coefficient = this.#evaluateNode(constNode);
+        const varIntegral = this.#processNode(varNode);
+        
+        const steps = [
+            `Выносим константу ${coefficient} за знак интеграла`,
+            ...varIntegral.steps.map(step => `${coefficient} * (${step})`)
+        ];
+        
+        return new IntegrationResult(
+            `${coefficient} * (${varIntegral.result})`,
+            steps
+        );
+    }
+
+    throw new IntegrationError('Неподдерживаемое произведение');
+}
+
+// Разделение на константу и переменную часть
+#separateConstAndVar(nodes) {
+    const constNode = nodes.find(node => 
+        node.type === 'ConstantNode' || 
+        (node.type === 'OperatorNode' && 
+         !this.#containsVariable(node, 'x'))
+    );
+    
+    const varNode = nodes.find(node => node !== constNode);
+    
+    return [constNode, varNode];
+}</code></pre>
+                    </div>
+                </div>
+
+                <h2 id="special">5. Особые случаи</h2>
+                <div class="method-description">
+                    <h3>5.1 Тригонометрические функции</h3>
+                    <div class="example-code">
+                        <pre><code class="language-javascript">#integrateTrigonometric(node) {
+    const funcName = node.name.toLowerCase();
+    const arg = node.args[0];
+
+    // Проверяем, что аргумент - это x
+    if (arg.type !== 'SymbolNode' || arg.name !== 'x') {
+        throw new IntegrationError(
+            'Поддерживается интегрирование только простых тригонометрических функций от x'
+        );
+    }
+
+    // Таблица интегралов тригонометрических функций
+    const trigIntegrals = {
+        'sin': {
+            result: '-\\cos(x)',
+            step: '∫sin(x)dx = -cos(x)'
+        },
+        'cos': {
+            result: '\\sin(x)',
+            step: '∫cos(x)dx = sin(x)'
+        },
+        'tan': {
+            result: '-\\ln|\\cos(x)|',
+            step: '∫tan(x)dx = -ln|cos(x)|'
+        }
+    };
+
+    const integral = trigIntegrals[funcName];
+    if (!integral) {
+        throw new IntegrationError(
+            `Неподдерживаемая тригонометрическая функция: ${funcName}`
+        );
+    }
+
+    return new IntegrationResult(
+        integral.result,
+        [`Применяем формулу: ${integral.step}`]
+    );
+}</code></pre>
+                    </div>
+
+                    <h3>5.2 Дробные степени</h3>
+                    <div class="example-code">
+                        <pre><code class="language-javascript">#integrateFractionalPower(node) {
+    const numerator = node.args[1].args[0];
+    const denominator = node.args[1].args[1];
+    
+    // Проверяем, что основание - это x
+    if (node.args[0].type !== 'SymbolNode' || 
+        node.args[0].name !== 'x') {
+        throw new IntegrationError(
+            'Поддерживается интегрирование только степеней x'
+        );
+    }
+
+    const power = this.#evaluateNode(numerator) / 
+                 this.#evaluateNode(denominator);
+    
+    // Особый случай: корень
+    if (denominator.value === 2) {
+        return new IntegrationResult(
+            `\\frac{2}{3}x^{\\frac{3}{2}}`,
+            ['Применяем формулу для корня: ∫√x dx = (2/3)x^(3/2)']
+        );
+    }
+
+    // Общий случай дробной степени
+    const newPower = power + 1;
+    return new IntegrationResult(
+        `\\frac{x^{${this.#formatFraction(newPower)}}}{${newPower}}`,
+        [`Применяем формулу: ∫x^(${power})dx = x^(${newPower})/${newPower}`]
+    );
+}</code></pre>
+                    </div>
+                </div>
+
+                <h2 id="error-handling">6. Обработка ошибок</h2>
+                <div class="method-description">
+                    <div class="example-code">
+                        <pre><code class="language-javascript">class IntegrationService {
+    integrate(expression) {
+        try {
+            // Основной процесс интегрирования
+            const node = this.#parseExpression(expression);
+            const result = this.#processNode(node);
+            return result;
+        } catch (error) {
+            // Обработка различных типов ошибок
+            if (error instanceof IntegrationError) {
+                switch (error.type) {
+                    case 'empty':
+                        return new IntegrationResult(
+                            'Ошибка: пустое выражение',
+                            ['Введите математическое выражение']
+                        );
+                    case 'parse':
+                        return new IntegrationResult(
+                            'Ошибка: некорректное выражение',
+                            ['Проверьте синтаксис выражения']
+                        );
+                    case 'no_variable':
+                        return new IntegrationResult(
+                            'Ошибка: нет переменной x',
+                            ['Выражение должно содержать переменную x']
+                        );
+                    default:
+                        return new IntegrationResult(
+                            'Ошибка: ' + error.message,
+                            ['Попробуйте упростить выражение']
+                        );
+                }
+            }
+            
+            // Неожиданные ошибки
+            console.error('Unexpected error:', error);
+            return new IntegrationResult(
+                'Произошла неожиданная ошибка',
+                ['Пожалуйста, сообщите об этой ошибке']
+            );
+        }
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h2 id="ui">7. Интерфейс пользователя</h2>
+                <div class="method-description">
+                    <div class="example-code">
+                        <pre><code class="language-javascript">class UIController {
+    #bindEvents() {
+        // Обработка ввода выражения
+        this.#elements.input.addEventListener('input', () => {
+            this.#processInput();
+        });
+
+        // Обработка примеров
+        this.#elements.examples.addEventListener('click', (event) => {
+            if (event.target.classList.contains('example-btn')) {
+                this.#elements.input.value = event.target.dataset.expr;
+                this.#processInput();
+            }
+        });
+    }
+
+    #processInput() {
+        const expression = this.#elements.input.value.trim();
+        
+        // Получаем результат интегрирования
+        const integrationService = new IntegrationService();
+        const { result, steps } = integrationService.integrate(expression);
+
+        // Обновляем UI
+        this.#updateResults(result, steps);
+    }
+
+    #updateResults(result, steps) {
+        // Обновляем поле с результатом
+        this.#elements.result.innerHTML = 
+            `\\[${result}\\]`;
+
+        // Обновляем шаги решения
+        this.#elements.steps.innerHTML = 
+            steps.map(step => `\\[${step}\\]`).join('<br>');
+
+        // Обновляем рендеринг формул
+        MathJax.typesetPromise();
+    }
+
+    // Форматирование выражений для отображения
+    #formatExpression(expr) {
+        return expr
+            .replace(/\*/g, '\\cdot ')
+            .replace(/sqrt/g, '\\sqrt')
+            .replace(/\^(\d+)/g, '^{$1}')
+            .replace(/\^(-?\d+\/\d+)/g, '^{$1}');
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h2 id="examples">5. Полные примеры решений</h2>
+                <div class="example-code">
+                    <h3>Пример 1: 2x² + 3x</h3>
+                    <ol>
+                        <li>Разбиваем на части:
+                            <div class="formula">∫(2x² + 3x)dx = ∫2x²dx + ∫3xdx</div>
+                        </li>
+                        <li>Интегрируем первую часть:
+                            <div class="formula">∫2x²dx = 2∫x²dx = 2(x³/3) = (2/3)x³</div>
+                        </li>
+                        <li>Интегрируем вторую часть:
+                            <div class="formula">∫3xdx = 3∫xdx = 3(x²/2) = (3/2)x²</div>
+                        </li>
+                        <li>Собираем результат:
+                            <div class="formula">(2/3)x³ + (3/2)x² + C</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="example-code">
+                    <h3>Пример 2: sin(x) + 1/x</h3>
+                    <ol>
+                        <li>Разбиваем на части:
+                            <div class="formula">∫(sin(x) + 1/x)dx = ∫sin(x)dx + ∫(1/x)dx</div>
+                        </li>
+                        <li>Интегрируем sin(x):
+                            <div class="formula">∫sin(x)dx = -cos(x)</div>
+                        </li>
+                        <li>Интегрируем 1/x:
+                            <div class="formula">∫(1/x)dx = ln|x|</div>
+                        </li>
+                        <li>Собираем результат:
+                            <div class="formula">-cos(x) + ln|x| + C</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="warning mt-5">
+                    <h4> Важные моменты:</h4>
+                    <ul>
+                        <li>Всегда используйте * для умножения (2*x, а не 2x)</li>
+                        <li>Степени записывайте через ^ (x^2, а не x²)</li>
+                        <li>Дробные степени берите в скобки: x^(1/2)</li>
+                        <li>Не забывайте про константу интегрирования C</li>
+                    </ul>
+                </div>
+
+                <div class="note mt-4">
+                    <h4> Полезные советы:</h4>
+                    <ul>
+                        <li>Начинайте с простых выражений и постепенно переходите к сложным</li>
+                        <li>Проверяйте результат: производная от ответа должна давать исходное выражение</li>
+                        <li>Используйте готовые примеры для практики</li>
+                    </ul>
+                </div>
+
+                <footer class="mt-5 text-center text-muted">
+                    <p> 2025 Калькулятор Интегралов. Версия 1.3.0</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            function setActiveLink() {
+                const fromTop = window.scrollY + 100;
+                
+                navLinks.forEach(link => {
+                    const section = document.querySelector(link.hash);
+                    
+                    if (section.offsetTop <= fromTop &&
+                        section.offsetTop + section.offsetHeight > fromTop) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', setActiveLink);
+            setActiveLink();
+        });
+    </script>
+</body>
+</html>

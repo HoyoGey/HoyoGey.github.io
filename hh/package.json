@@ -1,0 +1,7 @@
+{
+  "name": "html-test",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "http-server -c-1"
+  }
+}

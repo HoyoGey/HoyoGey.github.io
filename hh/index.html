@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Изучение HTML</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Learning Section -->
+        <div id="learning-container" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h1 class="text-3xl font-bold text-center mb-6">Обучение HTML</h1>
+            <div id="lesson-content" class="prose max-w-none mb-6">
+                <!-- Content will be loaded from lessons.js -->
+            </div>
+            <div class="text-center">
+                <button id="start-test-btn" class="bg-green-500 text-white px-6 py-3 rounded-lg text-lg hidden">
+                    Начать тестирование
+                </button>
+                <button id="next-lesson-btn" class="bg-blue-500 text-white px-6 py-3 rounded-lg text-lg">
+                    Следующий раздел
+                </button>
+            </div>
+            <div class="mt-4 text-center text-gray-600">
+                <span id="progress-text">Раздел 1 из 5</span>
+            </div>
+        </div>
+
+        <!-- Test Section (Initially Hidden) -->
+        <div id="test-container" class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6 hidden">
+            <h1 class="text-3xl font-bold text-center mb-6">Тест по HTML</h1>
+            
+            <div class="mb-4 flex justify-between items-center text-sm text-gray-600">
+                <div>Осталось вопросов: <span id="questions-remaining">0</span></div>
+                <div>Баллы за вопрос: <span id="current-question-points">0</span></div>
+            </div>
+
+            <div id="question-container" class="mb-6"></div>
+            <div id="options-container" class="space-y-2 mb-6"></div>
+            <div id="hint-container" class="hidden mb-4 p-4 bg-yellow-100 rounded"></div>
+            <div class="flex justify-between items-center">
+                <button id="hint-btn" class="bg-yellow-500 text-white px-4 py-2 rounded">Подсказка (-10%)</button>
+                <button id="next-btn" class="bg-blue-500 text-white px-4 py-2 rounded">Следующий вопрос</button>
+            </div>
+
+            <div id="results-container" class="hidden text-center">
+                <h2 class="text-2xl font-bold mb-4">Результаты теста</h2>
+                <p id="score-display" class="text-xl mb-4"></p>
+                <button id="restart-btn" class="bg-green-500 text-white px-4 py-2 rounded">Начать заново</button>
+            </div>
+
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-bold mb-2">Критерии оценок:</h3>
+                <ul class="text-sm text-gray-600">
+                    <li>90-100 баллов - Отлично (5)</li>
+                    <li>70-89 баллов - Хорошо (4)</li>
+                    <li>50-69 баллов - Удовлетворительно (3)</li>
+                    <li>49 и меньше - Неудовлетворительно (2)</li>
+                </ul>
+            </div>
+
+            <div class="text-sm text-gray-500 mt-4">
+                * Вопросы появляются в случайном порядке
+                * Последний вопрос - практическое задание
+            </div>
+        </div>
+    </div>
+    <script src="lessons.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
